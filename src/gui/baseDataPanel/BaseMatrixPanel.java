@@ -12,27 +12,53 @@ public class BaseMatrixPanel extends JPanel{
 
 
     MatrixA matrixA;
-    int matrixASize;
-    TitledBorder title;
+    MatrixX matrixX;
+    MatrixB matrixB;
+    int matrixSize;
+
+    JLabel equationSign;
+
 
     public BaseMatrixPanel(int matrixASize){
         super();
-        this.matrixASize = matrixASize;
-        this.setLayout(new BorderLayout());
-        title = BorderFactory.createTitledBorder("A");
-        title.setTitleJustification(TitledBorder.CENTER);
-        this.setBorder(title);
-        matrixA = new MatrixA(matrixASize);
+        this.matrixSize = matrixASize;
+
+        matrixA = new MatrixA(2);
+        matrixX = new MatrixX(2);
+        matrixB = new MatrixB(2);
+        equationSign = new JLabel("=");
+
         this.add(matrixA);
+        this.add(matrixX);
+        this.add(equationSign);
+        this.add(matrixB);
 
     }
     public void changeMatrixASize(int newSize){
         System.out.println("BaseMatrixPanel....changeMatrixSize(" + newSize + ")" );
-        matrixA = new MatrixA(newSize);
         this.remove(matrixA);
+        this.remove(matrixX);
+        this.remove(equationSign);
+        this.remove(matrixB);
+        matrixA = new MatrixA(newSize);
+        matrixX = new MatrixX(newSize);
+        equationSign = new JLabel("=");
+        matrixB = new MatrixB(newSize);
+
         this.add(matrixA);
-    this.repaint();
+        this.add(matrixX);
+        this.add(equationSign);
+        this.add(matrixB);
+        this.repaint();
+        this.revalidate();
     }
 
 
+    public double[][] getMatrixAData() {
+        return matrixA.getMartixAData();
+    }
+
+    public double[] getMatrixBData() {
+        return matrixB.getMatrixBData();
+    }
 }

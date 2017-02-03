@@ -1,10 +1,14 @@
 package gui;
 
 
+import gui.baseDataPanel.AvailableMethodsPanel;
 import gui.baseDataPanel.EquationsDataPanel;
+import gui.calculationMethods.LinearEquationMethods;
 import gui.resultDataPanel.ResultsDataPanel;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * Created by Nogaz on 02.01.2017.
@@ -37,9 +41,35 @@ public class MainFrame extends JFrame {
 
         this.getContentPane().add(splitPane);
 
+        equationsDataPanel.getStartButton().addActionListener(new StartEquationsButtonListener());
+
 
         this.pack();
         this.setVisible(true);
+    }
+
+    class StartEquationsButtonListener implements ActionListener {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String selectedMethod = equationsDataPanel.getSelectedValue();
+            System.out.println("Action command: " + selectedMethod);
+            double[][] matrixA = equationsDataPanel.getMatrixAData();
+            double[] matrixB = equationsDataPanel.getMatrixBData();
+            LinearEquationMethods method = new LinearEquationMethods();
+            switch( selectedMethod ){
+                case AvailableMethodsPanel.GaussaSeidla:
+                    method.gaussSeidlMethod(matrixA, matrixB);
+                    break;
+                case AvailableMethodsPanel.JacobiMethod:
+                    method.jacubi(matrixA, matrixB);
+                    break;
+                case AvailableMethodsPanel.LUdecomposition:
+                    method.LUDecompositionMethod(matrixA, matrixB);
+                    break;
+            }
+
+        }
     }
 
 

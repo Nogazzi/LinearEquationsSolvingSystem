@@ -60,4 +60,12 @@ public class BaseMatrixManagePanel extends JPanel implements ActionListener{
         matrixPanel.repaint();
         matrixPanel.revalidate();
     }
+
+    public double[] getMatrixBData() {
+        return matrixPanel.getMatrixBData();
+    }
+
+    public double[][] getMatrixAData() {
+        return matrixPanel.getMatrixAData();
+    }
 }

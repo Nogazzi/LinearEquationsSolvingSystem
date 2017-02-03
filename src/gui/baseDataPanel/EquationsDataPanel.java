@@ -25,4 +25,19 @@ public class EquationsDataPanel extends JPanel{
     }
 
 
+    public double[]getMatrixBData() {
+        return baseMatrixManagePanel.getMatrixBData();
+    }
+
+    public double[][] getMatrixAData() {
+        return baseMatrixManagePanel.getMatrixAData();
+    }
+
+    public JButton getStartButton() {
+        return methodsPanel.getStartButton();
+    }
+
+    public String getSelectedValue() {
+        return methodsPanel.getSelectedMethod();
+    }
 }

@@ -15,6 +15,10 @@ public class MatrixInputVerifier extends InputVerifier{
             number = Double.parseDouble(tf.getText());
             System.out.println("Current string is double");
             tf.setBackground(Color.white);
+            /*if( tf.getText().contains(",") ){
+                return false;
+            }*/
+
 
         }catch (NumberFormatException e){
             System.out.println("Current string is not a double");
@@ -23,4 +27,5 @@ public class MatrixInputVerifier extends InputVerifier{
         }
         return true;
     }
+
 }
