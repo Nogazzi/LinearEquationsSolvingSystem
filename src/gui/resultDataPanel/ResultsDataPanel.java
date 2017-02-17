@@ -19,10 +19,24 @@ public class ResultsDataPanel extends JTabbedPane {
 
         resultPanels = new ArrayList<>();
 
-        resultPanels.add(new EquationResultPanel("SOR"));
+        EquationResultPanel firstEquationDataPanel = new FirstEquationResultPanel();
         resultPanels.add(new EquationResultPanel("Metoda Jacobiego"));
         for (EquationResultPanel panel: resultPanels) {
             this.addTab(panel.getMethodName(), panel);
+
         }
+    }
+
+    public void addNewTab(ResultDataObject resultDataObject){
+        EquationResultPanel newPanel = new EquationResultPanel(resultDataObject);
+        String tabName = "#";
+        tabName += (resultPanels.size() + 1) + " ";
+        tabName += newPanel.getMethodName();
+        resultPanels.add(newPanel);
+        this.add(tabName, newPanel);
+    }
+
+    public void removeTab(){
+
     }
 }

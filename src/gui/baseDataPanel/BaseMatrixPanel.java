@@ -23,9 +23,9 @@ public class BaseMatrixPanel extends JPanel{
         super();
         this.matrixSize = matrixASize;
 
-        matrixA = new MatrixA(2);
-        matrixX = new MatrixX(2);
-        matrixB = new MatrixB(2);
+        matrixA = new MatrixA(matrixASize);
+        matrixX = new MatrixX(matrixASize);
+        matrixB = new MatrixB(matrixASize);
         equationSign = new JLabel("=");
 
         this.add(matrixA);
@@ -61,4 +61,6 @@ public class BaseMatrixPanel extends JPanel{
     public double[] getMatrixBData() {
         return matrixB.getMatrixBData();
     }
+
+
 }

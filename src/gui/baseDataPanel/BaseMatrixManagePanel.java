@@ -14,7 +14,7 @@ public class BaseMatrixManagePanel extends JPanel implements ActionListener{
     private int prefWidth = 1200;
     private int prefHeight = 450;
 
-    String[] matrixSizeList = {"2x2", "3x3", "4x4", "5x5", "6x6"};
+    String[] matrixSizeList = {"3x3", "4x4", "5x5", "6x6"};
 
 
     //matrix size
@@ -29,7 +29,7 @@ public class BaseMatrixManagePanel extends JPanel implements ActionListener{
         super();
         this.setPreferredSize(new Dimension(prefWidth, prefHeight));
 
-        matrixPanel = new BaseMatrixPanel(2);
+        matrixPanel = new BaseMatrixPanel(3);
 
 
         matrixSizeLabel = new JLabel(matrixSizeText);
@@ -68,4 +68,6 @@ public class BaseMatrixManagePanel extends JPanel implements ActionListener{
     public double[][] getMatrixAData() {
         return matrixPanel.getMatrixAData();
     }
+
+
 }

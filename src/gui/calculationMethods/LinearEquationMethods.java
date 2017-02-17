@@ -3,68 +3,41 @@ package gui.calculationMethods;
 import Jama.LUDecomposition;
 import Jama.Matrix;
 import gui.baseDataPanel.AvailableMethodsPanel;
+import gui.resultDataPanel.ResultDataObject;
 
 /**
  * Created by Nogaz on 28.01.2017.
  */
 public class LinearEquationMethods {
-    public double[][] jacobiMethod(double[][] matrixA, double[]matrixX, double[][] matrixB){
-        double result[][] = new double[2][2];
+    public static String COMMENT_ACCEPT = "accept";
+    public static String COMMENT_FAIL = "fail";
 
-        return result;
-    }
 
-    public double[][] LUDecompositionMethod(double[][] matrixA, double[]matrixB){
-        if( peculiar(matrixA) ){
-            System.out.println("Macierz jest osobliwa!");
-            return null;
+    public ResultDataObject metodaJacobiego(double[][] matrixA, double[] matrixB, double precisionParameter){
+        ResultDataObject resultDataObject = new ResultDataObject();
+        resultDataObject.setMethodName(AvailableMethodsPanel.JacobiMethod);
+        resultDataObject.setMatrixA(copyMatrix(matrixA));
+        resultDataObject.setMatrixB(copyMatrix(matrixB));
+        resultDataObject.setPrecision(precisionParameter);
+        resultDataObject.setMatrixLevel(matrixB.length);
+
+
+        double[][] matrixL = getLowMAtrix(matrixA);
+        double[][] matrixU = getUpperMAtrix(matrixA);
+        double[][] matrixD = getDiagonalMAtrix(matrixA);
+        //matrixD = opositeMatrix(matrixD);   //d = D^-1
+        try {
+            matrixD = opositeMatrix(matrixD);
+        } catch (PeculiarMatrixException e) {
+            e.printStackTrace();
+            resultDataObject.setCompleted(false);
+            resultDataObject.setReason("Macierz jest osobliwa");
+            return resultDataObject;
         }
-        double[][] result = new double[matrixA.length][matrixB.length];
-        double[][] matrixL = new double[matrixA.length][matrixB.length];
-        double[][] matrixU = new double[matrixA.length][matrixB.length];
-        for( int i = 0 ; i < matrixA.length ; ++i ){
-            for( int j = 0 ; j < matrixB.length ; ++j ){
-
-                if( i > j ){
-                    //ponizej gornej przekatnej
-                    matrixL[i][j] = matrixA[i][j];
-                    matrixU[i][j] = 0;
-                }else if( i < j ){
-                    //powyzej gornej przekatnej
-                    matrixL[i][j] = 0;
-                    matrixU[i][j] = matrixA[i][j];
-                }else{
-                    //glowna przekatna
-                    matrixL[i][j] = 1;
-                    matrixU[i][j] = matrixA[i][j];
-                }
-            }
-        }
-        System.out.println("Matrix A");
-        printMatrix(matrixA);
-        System.out.println("Matrix L");
-        printMatrix(matrixL);
-        System.out.println("Matrix U");
-        printMatrix(matrixU);
-        System.out.println("Matrix B");
-        printMatrix(matrixB);
-
-
-        return result;
-    }
-
-    public void jacubi(double[][] matrixA, double[] matrixB){
-
-        LUDecomposition luDecomposition = new LUDecomposition(new Matrix(matrixA));
-        Matrix matrixL = new Matrix(getDownMAtrix(matrixA));
-        Matrix matrixU = new Matrix(getUpperMAtrix(matrixA));
-        Matrix matrixD = new Matrix(getDiagonalMAtrix(matrixA));
-
-        Matrix matrixN = matrixD.inverse();
-        Matrix matrixM = matrixN.times(-1.0);
-        Matrix sum = matrixL.plus(matrixU);
-        matrixM = matrixM.times(sum);
-        double[] matrixNB = matrixMultiplication( matrixN.getArrayCopy(), matrixB);
+        double[] matrixN = matrixMultiplication(matrixD, matrixB);
+        double[][] matrixM = matrixMultiplication(matrixD, -1);
+        double[][] matrixLsumU = addMatrix(matrixL, matrixU);
+        matrixM = matrixMultiplication(matrixM, matrixLsumU);
 
         double[] resultMatrix = new double[matrixB.length];
         double[] tmpResultMatrix = new double[matrixB.length];
@@ -72,26 +45,32 @@ public class LinearEquationMethods {
             resultMatrix[i] = 0;
             tmpResultMatrix[i] = 0;
         }
-        printMatrix(matrixM.getArrayCopy());
-        printMatrix(matrixNB);
         boolean preciseEnough = false;
         double difference;
-        double possibleError = 0.002;
         int iteracja = 1;
         while( preciseEnough == false ){
-            reprintMatrix(resultMatrix, tmpResultMatrix);
-            resultMatrix = matrixMultiplication(matrixM.getArrayCopy(), resultMatrix);
-            resultMatrix = addMatrix(resultMatrix, matrixNB);
+            resultMatrix = copyMatrix(tmpResultMatrix);
+            //reprintMatrix(tmpResultMatrix, resultMatrix);
+            System.out.println("Iteracja: " + iteracja);
+            System.out.println("Wejsciowa macierz M:");
+            printMatrix(matrixM);
+            System.out.println("Wejsciowa macierz x^n:");
+            printMatrix(resultMatrix);
+            System.out.println("Wejsciowa macierz N:");
+            printMatrix(matrixN);
+
+            tmpResultMatrix = matrixMultiplication(matrixM, tmpResultMatrix);
+            tmpResultMatrix = addMatrix(tmpResultMatrix, matrixN);
+
             //spr wielkosc bledu
             preciseEnough = true;
-            System.out.println("Iteracja: " + iteracja);
             System.out.println("aktualny stan wyniku:");
-            for(int i = 0 ; i < resultMatrix.length ; ++i){
-                System.out.println(resultMatrix[i]);
+            for(int i = 0 ; i < tmpResultMatrix.length ; ++i){
+                System.out.println(tmpResultMatrix[i]);
             }
             for( int i = 0 ; i < resultMatrix.length ; ++i ){
-                if( Math.abs(resultMatrix[i] - tmpResultMatrix[i]) > possibleError ){
-                    System.out.println("Koniec roboty");
+                if( Math.abs(resultMatrix[i] - tmpResultMatrix[i]) > precisionParameter ){
+                    System.out.println("Nadal zbyt duzy blad");
                     preciseEnough = false;
                 }
             }
@@ -99,161 +78,78 @@ public class LinearEquationMethods {
         }
         printMatrix(resultMatrix);
 
+        resultDataObject.setCompleted(true);
+        resultDataObject.setIterationsNumber(iteracja);
+        resultDataObject.setResultX(copyMatrix(resultMatrix));
+        return resultDataObject;
     }
 
-    public void jacobieMethod(double[][] matrixA, double[]matrixB){
 
 
-        double[][] matrixL = getDownMAtrix(matrixA);
+    public ResultDataObject metodaGaussaSeidla(double[][] matrixA, double[]matrixB, double precisionParameter){
+
+        ResultDataObject resultDataObject = new ResultDataObject();
+        resultDataObject.setMethodName(AvailableMethodsPanel.GaussaSeidla);
+        resultDataObject.setMatrixA(copyMatrix(matrixA));
+        resultDataObject.setMatrixB(copyMatrix(matrixB));
+        resultDataObject.setPrecision(precisionParameter);
+        resultDataObject.setMatrixLevel(matrixB.length);
+
+        double[][] matrixL = getLowMAtrix(matrixA);
         double[][] matrixU = getUpperMAtrix(matrixA);
         double[][] matrixD = getDiagonalMAtrix(matrixA);
-
+        double[][] samePartMatrix = addMatrix(matrixD, matrixL);
+        try {
+            samePartMatrix = opositeMatrix(samePartMatrix); //w postaci (D+L)^-1
+        } catch (PeculiarMatrixException e) {
+            e.printStackTrace();
+            resultDataObject.setCompleted(false);
+            resultDataObject.setReason("Macierz jest osobliwa");
+            return resultDataObject;
+        }
         if( matrixDiagonalDomination(matrixA) ){
             System.out.println("Macierz A jest diagonalnie dominująca.");
         }else{
             System.out.println("Macierz A NIE jest diagonalnie dominująca.");
             System.out.println("Metoda Jacobiego nie będzie zbieżna.");
-            return;
+            resultDataObject.setCompleted(false);
+            resultDataObject.setReason("Macierz nie jest diagonalnie dominująca");
+            return resultDataObject;
         }
-        System.out.println("Matrix A");
-        printMatrix(matrixA);
-        System.out.println("Matrix L");
-        printMatrix(matrixL);
-        System.out.println("Matrix U");
-        printMatrix(matrixU);
-        System.out.println("Matrix D");
-        printMatrix(matrixD);
-        System.out.println("Matrix B");
-        printMatrix(matrixB);
-
         if( peculiar(matrixA) ){
             System.out.println("Macierz jest osobliwa!");
-            return;
+            resultDataObject.setCompleted(false);
+            resultDataObject.setReason("Macierz jest osobliwa");
+            return resultDataObject;
         }
-
-        //obliczenia
-        double[] prawyCzynnik = matrixMultiplication(matrixD, matrixB);
-        double[] initialVector = new double[matrixB.length];
-        double[] lewyCzynnik = new double[matrixB.length];
-        double[][] matrixN;
-        double[][] matrixM;
-        for( int i = 0 ; i < initialVector.length ; ++i ){
-            initialVector[i] = 0;
-        }
-        //matrixD = opositeMatrix(matrixD);
 
         //przygotowanie macierzy M
-        matrixN = opositeMatrix(matrixD);
-        matrixM = matrixMultiplication(matrixN, -1);
-        System.out.println("\nMacierz -D^-1");
-        printMatrix(matrixM);
-        matrixM = matrixMultiplication(matrixM, addMatrix(matrixL, matrixU));
-        System.out.println("\nMacierz -D(L+U)");
-        printMatrix(matrixM);
+        double[] matrixN = matrixMultiplication(samePartMatrix, matrixB);
+        double[][] matrixM = matrixMultiplication(samePartMatrix, -1.0);
+        matrixM = matrixMultiplication(matrixM, matrixU);
 
 
-        //przygotowanie macierzy N
-        System.out.println("\nMacierz N");
-        printMatrix(matrixN);
-
-
-        double[] nbMatrix = matrixMultiplication(matrixN, matrixB);
         //obliczenia iteracyjne
 
         double[] resultMatrix;
         double[] tmpMat = new double[matrixB.length];
 
-        boolean enough = false;
-        double[] enoughMeter = tmpMat;
-        double errorMeter = 0.002;
-        int iterations = 0;
-        for( int i = 0 ; i < tmpMat.length ; ++i ){
-            tmpMat[i] = 0;
-            enoughMeter[i] = 0;
-        }
-        while( enough == false ){
-            reprintMatrix(tmpMat, enoughMeter);
-            tmpMat = addMatrix( matrixMultiplication(matrixM, tmpMat), nbMatrix);
-            enough = true;
-            for( int i = 0 ; i < tmpMat.length ; ++i ){
-                if( Math.abs(tmpMat[i] - enoughMeter[i]) > errorMeter ){
-                    enough = false;
-                }
-                System.out.println("Roznica wyrazen w iteracji : " +( iterations+1) + " " + Math.abs(tmpMat[i] - enoughMeter[i]));
-            }
-
-            iterations++;
-            System.out.println("Iteracja " + iterations);
-            printMatrix(tmpMat);
-        }
-        resultMatrix = tmpMat;
-
-        System.out.println("Wynik obliczeń:");
-        printMatrix(resultMatrix);
-        System.out.println("Potrzebna liczba iteracji: " + iterations);
-
-    }
-
-    public void gaussSeidlMethod(double[][] matrixA, double[]matrixB){
-
-
-        double[][] matrixL = getDownMAtrix(matrixA);
-        double[][] matrixU = getUpperMAtrix(matrixA);
-        double[][] matrixD = getDiagonalMAtrix(matrixA);
-
-        if( matrixDiagonalDomination(matrixA) ){
-            System.out.println("Macierz A jest diagonalnie dominująca.");
-        }else{
-            System.out.println("Macierz A NIE jest diagonalnie dominująca.");
-            System.out.println("Metoda Jacobiego nie będzie zbieżna.");
-            return;
-        }
-
-
-        if( peculiar(matrixA) ){
-            System.out.println("Macierz jest osobliwa!");
-            return;
-        }
-
-        //obliczenia
-        double[] initialVector = new double[matrixB.length];
-        double[][] matrixN;
-        double[][] matrixM;
-        double[][] matrixOpisiteDiag;
-        double[] matrixO;
-        for( int i = 0 ; i < initialVector.length ; ++i ){
-            initialVector[i] = 0;
-        }
-        //matrixD = opositeMatrix(matrixD);
-
-        //przygotowanie macierzy M
-        matrixM = addMatrix(matrixD, matrixL);
-        matrixM = opositeMatrix(matrixM);
-
-        matrixU = matrixMultiplication(matrixU, -1);
-
-        //obliczenia iteracyjne
-
-        double[] resultMatrix = new double[matrixB.length];
-        double[] tmpMat = new double[matrixB.length];
-
-        double[] rightEquation = new double[matrixB.length];
+        double[] rightEquation;
         boolean enough = false;
         double[] actualRes = new double[matrixB.length];
-        double errorMeter = 0.002;
         int iterations = 0;
         for( int i = 0 ; i < tmpMat.length ; ++i ){
             tmpMat[i] = 0;
             actualRes[i] = 0;
         }
-        while( enough == false ){
-            reprintMatrix(tmpMat, actualRes);
-            rightEquation = matrixMultiplication(matrixU, tmpMat);
-            rightEquation = addMatrix(rightEquation, matrixB);
-            tmpMat = matrixMultiplication(matrixM, rightEquation);
+        while( enough == false && iterations < 5 ){
+            actualRes = copyMatrix(tmpMat);
+            //reprintMatrix(tmpMat, actualRes);
+            tmpMat = matrixMultiplication(matrixM, tmpMat);
+            tmpMat = addMatrix(tmpMat, matrixN);
             enough = true;
             for( int i = 0 ; i < tmpMat.length ; ++i ){
-                if( Math.abs(tmpMat[i] - actualRes[i]) > errorMeter ){
+                if( Math.abs(tmpMat[i] - actualRes[i]) > precisionParameter ){
                     enough = false;
                 }
                 System.out.println("Roznica wyrazen w iteracji : " +( iterations+1) + " " + Math.abs(tmpMat[i] - actualRes[i]));
@@ -268,7 +164,251 @@ public class LinearEquationMethods {
         printMatrix(resultMatrix);
         System.out.println("Potrzebna liczba iteracji: " + iterations);
 
+        resultDataObject.setIterationsNumber(iterations);
+        resultDataObject.setResultX(copyMatrix(resultMatrix));
+        resultDataObject.setCompleted(true);
+        return resultDataObject;
     }
+
+    public ResultDataObject metodaSOR(double[][] matrixA, double[]matrixB, double wspolczynnik, double precisionParameter){
+        ResultDataObject resultDataObject = new ResultDataObject();
+        resultDataObject.setMethodName(AvailableMethodsPanel.SOR);
+        resultDataObject.setMatrixA(copyMatrix(matrixA));
+        resultDataObject.setMatrixB(copyMatrix(matrixB));
+        resultDataObject.setPrecision(precisionParameter);
+        resultDataObject.setParameter(wspolczynnik);
+        resultDataObject.setMatrixLevel(matrixB.length);
+
+        double[][] matrixL = getLowMAtrix(matrixA);
+        double[][] matrixU = getUpperMAtrix(matrixA);
+        double[][] matrixD = getDiagonalMAtrix(matrixA);
+
+        double[][] matrixM;
+        double[] matrixN;
+        double[][] sharedPart = matrixMultiplication(matrixL, wspolczynnik);
+        sharedPart = addMatrix(sharedPart, matrixD);
+        try {
+            sharedPart = opositeMatrix(sharedPart);
+        } catch (PeculiarMatrixException e) {
+            e.printStackTrace();
+            resultDataObject.setCompleted(false);
+            resultDataObject.setReason("Macierz jest osobliwa");
+            return resultDataObject;
+        }
+        //macierz shared juz gotowa
+
+        //macierz M
+        matrixM = matrixMultiplication(matrixD, (1.0d-wspolczynnik));
+        double[][] tmpM = matrixMultiplication(matrixU, wspolczynnik);
+        matrixM = substractMatrix(matrixM, tmpM);
+        matrixM = matrixMultiplication(sharedPart, matrixM);
+
+
+        //macierz N
+        double[][] tmpMat = matrixMultiplication(sharedPart, wspolczynnik);
+        matrixN = matrixMultiplication(tmpMat, matrixB);
+
+
+        if( matrixDiagonalDomination(matrixA) ){
+            System.out.println("Macierz A jest diagonalnie dominująca.");
+        }else{
+            System.out.println("Macierz A NIE jest diagonalnie dominująca.");
+            System.out.println("Metoda Jacobiego nie będzie zbieżna.");
+            resultDataObject.setCompleted(false);
+            resultDataObject.setReason("Macierz nie jest diagonalnie dominująca");
+            return resultDataObject;
+        }
+        if( peculiar(matrixA) ){
+            System.out.println("Macierz jest osobliwa!");
+            resultDataObject.setCompleted(false);
+            resultDataObject.setReason("Macierz jest osobliwa!");
+            return resultDataObject;
+        }
+        //obliczenia iteracyjne
+
+        double[] resultMatrix = new double[matrixB.length];
+
+        double[] rightEquation;
+        boolean enough = false;
+        double[] actualRes = new double[matrixB.length];
+        int iterations = 1;
+        for( int i = 0 ; i < resultMatrix.length ; ++i ){
+            resultMatrix[i] = 0;
+            actualRes[i] = 0;
+        }
+        while( enough == false ){
+            actualRes = copyMatrix(resultMatrix);
+            System.out.println("\nIteracja " + iterations);
+            System.out.println("Macierz wejsciowa M:");
+            printMatrix(matrixM);
+            System.out.println("Macierz wejsciowa x^n:");
+            printMatrix(resultMatrix);
+            System.out.println("Macierz wejsciowa N:");
+            printMatrix(matrixN);
+            resultMatrix = matrixMultiplication(matrixM, resultMatrix);
+            resultMatrix = addMatrix(resultMatrix, matrixN);
+            enough = true;
+            for( int i = 0 ; i < resultMatrix.length ; ++i ){
+                if( Math.abs(resultMatrix[i] - actualRes[i]) > precisionParameter ){
+                    enough = false;
+                }
+                //System.out.println("Roznica wyrazen w iteracji : " +( iterations+1) + " " + Math.abs(resultMatrix[i] - actualRes[i]));
+            }
+            iterations++;
+
+            //printMatrix(resultMatrix);
+        }
+
+        System.out.println("Wynik obliczeń:");
+        printMatrix(resultMatrix);
+        System.out.println("Potrzebna liczba iteracji: " + iterations);
+
+        resultDataObject.setIterationsNumber(iterations);
+        resultDataObject.setResultX(copyMatrix(resultMatrix));
+        resultDataObject.setCompleted(true);
+
+        return resultDataObject;
+    }
+
+    public ResultDataObject metodaEliminacjiGaussa(double[][] matrixA, double[] matrixB){
+
+        ResultDataObject resultDataObject = new ResultDataObject();
+        resultDataObject.setMethodName(AvailableMethodsPanel.ElimGausSeidl);
+        resultDataObject.setMatrixA(copyMatrix(matrixA));
+        resultDataObject.setMatrixB(copyMatrix(matrixB));
+        resultDataObject.setMatrixLevel(matrixB.length);
+
+        int n = matrixA.length;
+        double[][] tmpMatrixA = copyMatrix(matrixA);
+        double[] tmpMatrixB = copyMatrix(matrixB);
+
+        //eliminacja do przodu
+        for( int k = 0 ; k < n ; ++k ){
+            for( int i = k+1 ; i < n ; ++i ){
+                if( tmpMatrixA[k][k] == 0 ){
+                    resultDataObject.setCompleted(false);
+                    resultDataObject.setReason("Dzielenie przez 0");
+                    return resultDataObject;
+                }
+                double alfa = tmpMatrixA[i][k] / tmpMatrixA[k][k];
+
+                for( int j = k ; j < n ; ++j ){
+                    tmpMatrixA[i][j] -= alfa * tmpMatrixA[k][j];
+                }
+                tmpMatrixB[i] -= alfa * tmpMatrixB[k];
+            }
+        }
+
+        //podstawienie wstecz
+        for( int i = n-1 ; i >= 0 ; --i ){
+            for( int j = i+1 ; j < n ; ++j ){
+                tmpMatrixB[i] -= tmpMatrixA[i][j] * tmpMatrixB[j];
+            }
+            if( tmpMatrixA[i][i] == 0 ){
+                resultDataObject.setCompleted(false);
+                resultDataObject.setReason("Dzielenie przez 0");
+                return resultDataObject;
+            }
+            tmpMatrixB[i] /= tmpMatrixA[i][i];
+        }
+
+        System.out.println("Wyniki obliczeń:");
+        printMatrix(tmpMatrixB);
+
+        resultDataObject.setResultX(copyMatrix(tmpMatrixB));
+        resultDataObject.setCompleted(true);
+
+        return resultDataObject;
+    }
+
+    public ResultDataObject metodaRozkladuLU(double[][] matrixA, double[] matrixB){
+
+        ResultDataObject resultDataObject = new ResultDataObject();
+        resultDataObject.setMethodName(AvailableMethodsPanel.LUdecomposition);
+        resultDataObject.setMatrixA(copyMatrix(matrixA));
+        resultDataObject.setMatrixB(copyMatrix(matrixB));
+        resultDataObject.setMatrixLevel(matrixB.length);
+
+        int n = matrixA.length;
+        double[][] tmpMatrixU = copyMatrix(matrixA);
+        double[] tmpMatrixB = copyMatrix(matrixB);
+        double[][] tmpMatrixL = copyMatrix(matrixA);
+
+
+        //eliminacja do przodu
+        for( int k = 0 ; k < n ; ++k ){
+            for( int i = k+1 ; i < n ; ++i ){
+                if( tmpMatrixU[k][k] == 0 ){
+                    resultDataObject.setCompleted(false);
+                    resultDataObject.setReason("Dzielenie przez 0");
+                    return resultDataObject;
+                }
+                double alfa = tmpMatrixU[i][k] / tmpMatrixU[k][k];
+                double tmpL = matrixA[i][k];
+                for( int j = k ; j < n ; ++j ){
+
+                    tmpMatrixU[i][j] -= alfa * tmpMatrixU[k][j];
+                    //tmpL -=  matrixA[j][k]*tmpMatrixA[k][i];
+                    //tmpMatrixL[i][k] -=  alfa// / tmpMatrixA[k][k];
+                }
+                tmpMatrixL[i][k] =  alfa;//tmpL / tmpMatrixA[k][k];
+            }
+        }
+        for(int i = 0 ; i < n ; i++ ){
+            for( int j = 0 ; j < n ; ++j ){
+                if( i < j ){
+                    tmpMatrixL[i][j] = 0;
+                }else if( i == j ){
+                    tmpMatrixL[i][j] = 1;
+                }
+            }
+        }
+
+        //Ly = b
+        double[] resultY = copyMatrix(matrixB);
+        //podstawianie wprzod
+        for( int i = 0 ; i < n ; ++i ){
+            for( int j = 0 ; j < i ; ++j ){
+                resultY[i] -= tmpMatrixL[i][j] * resultY[j];
+            }
+            if( tmpMatrixL[i][i] == 0 ){
+                resultDataObject.setCompleted(false);
+                resultDataObject.setReason("Dzielenie przez 0");
+                return resultDataObject;
+            }
+            resultY[i] /= tmpMatrixL[i][i];
+        }
+
+        //Ux = y
+        double[] resutlX = copyMatrix(resultY);
+        //podstawianie wstecz
+        for( int i = n-1 ; i >= 0 ; --i ){
+            for( int j = i+1 ; j < n ; ++j ){
+                resutlX[i] -= tmpMatrixU[i][j] * resutlX[j];
+            }
+            if( tmpMatrixU[i][i] == 0 ){
+                resultDataObject.setCompleted(false);
+                resultDataObject.setReason("Dzielenie przez 0");
+                return resultDataObject;
+            }
+            resutlX[i] /= tmpMatrixU[i][i];
+        }
+
+        System.out.println("Wyniki obliczeń:");
+        System.out.println("Macierz U");
+        printMatrix(tmpMatrixU);
+        System.out.println("Macierz L");
+        printMatrix(tmpMatrixL);
+        System.out.println("Macierz result Y");
+        printMatrix(resultY);
+        System.out.println("Macierz result X");
+        printMatrix(resutlX);
+
+        resultDataObject.setResultX(copyMatrix(resutlX));
+        resultDataObject.setCompleted(true);
+        return resultDataObject;
+    }
+
 
 
     public void printMatrix(double[][] matrix) {
@@ -330,19 +470,19 @@ public class LinearEquationMethods {
         }
         return resultMatrix;
     }
-    double[][] getDownMAtrix(double[][] matrix){
+    double[][] getLowMAtrix(double[][] matrix){
         double[][] resultMatrix = new double[matrix.length][matrix[0].length];
         for( int i = 0 ; i < matrix.length ; ++i ) {
             for (int j = 0; j < matrix.length; ++j) {
                 if( i > j ){
                     //ponizej gornej przekatnej
-                    resultMatrix[i][j] = 0;
+                    resultMatrix[i][j] = matrix[i][j];
                 }else if( i < j ){
                     //powyzej gornej przekatnej
                     resultMatrix[i][j] = 0;
                 }else{
                     //glowna przekatna
-                    resultMatrix[i][j] = matrix[i][j];
+                    resultMatrix[i][j] = 0;
                 }
             }
         }
@@ -359,7 +499,7 @@ public class LinearEquationMethods {
         return transposed;
     }
 
-    public double[][] opositeMatrix(double[][] matrix){
+    public double[][] opositeMatrix(double[][] matrix) throws PeculiarMatrixException {
         double[][] opositeMatrix = new double[matrix.length][matrix[0].length];
 
         //oblicz wyznacznik detA
@@ -369,7 +509,7 @@ public class LinearEquationMethods {
         if( detA == 0 ){
             //nie istnieje macierz odwrotna
             System.out.println("Nie istnieje macierz odwrotna, sorki");
-            return null;
+            throw new PeculiarMatrixException();
         }
         System.out.println("Możemy liczyć macierz odwrotną");
 
@@ -608,6 +748,17 @@ public class LinearEquationMethods {
         }
         return resultMatrix;
     }
+    public double[][] substractMatrix(double[][] matrix1, double[][] matrix2){
+        int rows = matrix1.length;
+        int columns = matrix1[0].length;
+        double[][] resultMatrix = new double[rows][columns];
+        for( int i = 0 ; i < rows ; ++i ){
+            for( int j = 0 ; j < columns ; ++j ){
+                resultMatrix[i][j] = matrix1[i][j] - matrix2[i][j];
+            }
+        }
+        return resultMatrix;
+    }
 
     public double[] addMatrix(double[] matrix1, double[] matrix2){
         int rows = matrix1.length;
@@ -618,6 +769,23 @@ public class LinearEquationMethods {
         return resultMatrix;
     }
 
+    public double[] copyMatrix(double[] matrix){
+        double[] result = new double[matrix.length];
+        for( int i = 0 ; i < result.length ; ++i ){
+            result[i] = new Double(matrix[i]);
+        }
+        return result;
+    }
+    public double[][] copyMatrix(double[][] matrix){
+        double[][] result = new double[matrix.length][matrix[0].length];
+        for( int i = 0 ; i < result.length ; ++i ){
+            for( int j = 0 ; j < matrix[0].length ; ++j ){
+                result[i][j] = new Double(matrix[i][j]);
+            }
+        }
+        return result;
+    }
+
     public boolean diagonalNotZeros(double[][] matrix){
         for( int i = 0 ; i < matrix.length ; ++i ){
             if( matrix[i][i] == 0 ){
@@ -625,5 +793,26 @@ public class LinearEquationMethods {
             }
         }
         return true;
+    }
+    public void gausElimination(double[][] matrix, double[] matrixB){
+        double[][] matrixGaus = copyMatrix(matrix);
+        double[] matrixGausB = copyMatrix(matrixB);
+
+        for( int i = 1 ; i < matrixGaus.length ; ++i ){
+            for( int j = i ; j < matrixGaus.length ; ++j ){
+                if( j < i ){
+                    matrixGaus[i][j] = 0;
+                }else{
+                    matrixGaus[i][j] = matrixGaus[i][j] - matrixGaus[i-1][j]*(matrixGaus[j][i-1]/matrixGaus[i-1][i-1]);
+                }
+                matrixGausB[j] = matrixGausB[j] - matrixGausB[i-1]*(matrixGausB[j]);
+
+            }
+        }
+    }
+
+    public class PeculiarMatrixException extends Exception{
+    }
+    public class DivideByZeroException extends Exception{
     }
 }

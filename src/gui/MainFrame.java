@@ -59,14 +59,21 @@ public class MainFrame extends JFrame {
             LinearEquationMethods method = new LinearEquationMethods();
             switch( selectedMethod ){
                 case AvailableMethodsPanel.GaussaSeidla:
-                    method.gaussSeidlMethod(matrixA, matrixB);
+                    resultsDataPanel.addNewTab(method.metodaGaussaSeidla(matrixA, matrixB, equationsDataPanel.getPrecisionParameter()));
                     break;
                 case AvailableMethodsPanel.JacobiMethod:
-                    method.jacubi(matrixA, matrixB);
+                    resultsDataPanel.addNewTab(method.metodaJacobiego(matrixA, matrixB, equationsDataPanel.getPrecisionParameter()));
+                    break;
+                case AvailableMethodsPanel.SOR:
+                    resultsDataPanel.addNewTab(method.metodaSOR(matrixA, matrixB, equationsDataPanel.getWspolczynnikSOR(), equationsDataPanel.getPrecisionParameter()));
+                    break;
+                case AvailableMethodsPanel.ElimGausSeidl:
+                    resultsDataPanel.addNewTab(method.metodaEliminacjiGaussa(matrixA, matrixB));
                     break;
                 case AvailableMethodsPanel.LUdecomposition:
-                    method.LUDecompositionMethod(matrixA, matrixB);
+                    resultsDataPanel.addNewTab(method.metodaRozkladuLU(matrixA, matrixB));
                     break;
+
             }
 
         }

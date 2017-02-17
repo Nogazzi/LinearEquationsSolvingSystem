@@ -7,6 +7,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.Arc2D;
 
 /**
  * Created by Nogaz on 02.01.2017.
@@ -16,11 +17,12 @@ public class AvailableMethodsPanel extends JPanel {
     private int prefHeight = 450;
 
     ButtonGroup methodButtonsGroup;
-    private String[] methods = {"Eliminacja Gaussa-Seidla", "Rozkład LU", "Jacobiego", "Gaussa-Seidla", "SOR"};
-    public static final String ElimGausSeidl = "Eliminacja Gaussa-Seidla";
+    private String[] methods = {ElimGausSeidl, LUdecomposition, JacobiMethod, GaussaSeidla, SOR};
+    public static final String ElimGausSeidl = "Eliminacja Gaussa";
     public static final String LUdecomposition = "Rozkład LU";
-    public static final String JacobiMethod = "Jacobiego";
-    public static final String GaussaSeidla = "Gaussa-Seidla";
+    public static final String JacobiMethod = "Metoda Jacobiego";
+    public static final String GaussaSeidla = "Metoda Gaussa-Seidla";
+    public static final String SOR = "Metoda SOR";
 
     JPanel parameterPanel;
     JLabel parameterText;
@@ -62,6 +64,8 @@ public class AvailableMethodsPanel extends JPanel {
         parameterText = new JLabel("Parameter: ");
         parameterInput = new JTextField(5);
         parameterInput.setHorizontalAlignment(JTextField.CENTER);
+        parameterInput.setInputVerifier(new MatrixInputVerifier());
+        parameterInput.setText("1.1");
         parameterPanel.add(parameterText);
         parameterPanel.add(parameterInput);
         parameterInput.setEnabled(false);
@@ -70,6 +74,7 @@ public class AvailableMethodsPanel extends JPanel {
         maxIterationText = new JLabel("Max iterations: ");
         maxIterationNumberInput = new JTextField(5);
         maxIterationNumberInput.setHorizontalAlignment(JTextField.CENTER);
+        maxIterationNumberInput.setText("30");
         maxIterationNumberPanel.add(maxIterationText);
         maxIterationNumberPanel.add(maxIterationNumberInput);
 
@@ -77,6 +82,8 @@ public class AvailableMethodsPanel extends JPanel {
         precisionText = new JLabel("Precision:");
         precisionInput = new JTextField(5);
         precisionInput.setHorizontalAlignment(JTextField.CENTER);
+        precisionInput.setInputVerifier(new MatrixInputVerifier());
+        precisionInput.setText("0.002");
         precisionPanel.add(precisionText);
         precisionPanel.add(precisionInput);
 
@@ -92,15 +99,26 @@ public class AvailableMethodsPanel extends JPanel {
         return this.startEquationButton;
     }
 
+    public double getWspolczynnikSOR() {
+        double parameter = Double.parseDouble(parameterInput.getText());
+        return parameter;
+    }
+
+    public double getPrecisionParameter() {
+        double precisionParameter = Double.parseDouble(precisionInput.getText());
+        return precisionParameter;
+    }
+
     class AvailableMethodsActionListener implements ActionListener{
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if( methodButtonsGroup.getSelection().getActionCommand().equals("SOR") ){
-                System.out.println("Aktywny " + methodButtonsGroup.getSelection().getActionCommand().toString());
+            if( getSelectedMethod().equals(AvailableMethodsPanel.SOR) ){
+                System.out.println("Aktywny " + getSelectedMethod());
                 parameterInput.setEnabled(true);
+
             }else{
-                System.out.println("Aktywny " + methodButtonsGroup.getSelection().getActionCommand().toString());
+                System.out.println("Aktywny " + getSelectedMethod());
                 parameterInput.setEnabled(false);
             }
 

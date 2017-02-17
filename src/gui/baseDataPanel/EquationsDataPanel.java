@@ -40,4 +40,12 @@ public class EquationsDataPanel extends JPanel{
     public String getSelectedValue() {
         return methodsPanel.getSelectedMethod();
     }
+
+    public double getWspolczynnikSOR() {
+        return methodsPanel.getWspolczynnikSOR();
+    }
+
+    public double getPrecisionParameter() {
+        return methodsPanel.getPrecisionParameter();
+    }
 }
