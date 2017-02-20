@@ -100,13 +100,30 @@ public class AvailableMethodsPanel extends JPanel {
     }
 
     public double getWspolczynnikSOR() {
-        double parameter = Double.parseDouble(parameterInput.getText());
-        return parameter;
+        try{
+            double parameter = Double.parseDouble(parameterInput.getText());
+            return parameter;
+        }catch ( NumberFormatException e){
+            throw new NumberFormatException();
+        }
     }
 
     public double getPrecisionParameter() {
-        double precisionParameter = Double.parseDouble(precisionInput.getText());
-        return precisionParameter;
+        try{
+            double precisionParameter = Double.parseDouble(precisionInput.getText());
+            return precisionParameter;
+        }catch ( NumberFormatException e){
+            throw new NumberFormatException();
+        }
+    }
+
+    public int getMaxIterationsNumber()  {
+        try {
+            int result = Integer.parseInt(maxIterationNumberInput.getText());
+            return result;
+        }catch ( NumberFormatException e){
+            throw new NumberFormatException();
+        }
     }
 
     class AvailableMethodsActionListener implements ActionListener{

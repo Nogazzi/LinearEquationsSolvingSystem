@@ -42,10 +42,26 @@ public class EquationsDataPanel extends JPanel{
     }
 
     public double getWspolczynnikSOR() {
-        return methodsPanel.getWspolczynnikSOR();
+        try{
+            return methodsPanel.getWspolczynnikSOR();
+        }catch ( NumberFormatException e){
+            throw new NumberFormatException();
+        }
     }
 
     public double getPrecisionParameter() {
-        return methodsPanel.getPrecisionParameter();
+        try{
+            return methodsPanel.getPrecisionParameter();
+        }catch ( NumberFormatException e){
+            throw new NumberFormatException();
+        }
+    }
+
+    public int getMaxIterationsNumber(){
+        try {
+            return methodsPanel.getMaxIterationsNumber();
+        }catch ( NumberFormatException e){
+            throw new NumberFormatException();
+        }
     }
 }

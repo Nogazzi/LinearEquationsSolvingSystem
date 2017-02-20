@@ -13,7 +13,7 @@ public class ResultDataObject {
     protected double precision;
     protected double parameter;
     protected int iterationsNumber;
-    protected double computationsTime;
+    protected long computationsTime;
     protected boolean completed;
     protected String reason;
     protected int matrixLevel;
@@ -82,10 +82,10 @@ public class ResultDataObject {
     public String getReason() {
         return reason;
     }
-    public double getComputationsTime() {
+    public long getComputationsTime() {
         return computationsTime;
     }
-    public void setComputationsTime(double computationsTime) {
+    public void setComputationsTime(long computationsTime) {
         this.computationsTime = computationsTime;
     }
 }

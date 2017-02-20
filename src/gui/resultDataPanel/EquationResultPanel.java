@@ -170,50 +170,90 @@ public class EquationResultPanel extends JPanel {
             JPanel additionalInfoPanel = new JPanel();
             int infoRows;
 
-            additionalInfoPanel.setLayout(new GridLayout(4, 2, 5, 10));
+            additionalInfoPanel.setLayout(new BoxLayout(additionalInfoPanel, BoxLayout.PAGE_AXIS));
 
 
 
             if( resultDataObject.isCompleted() ){
                 //powodzenie w obliczeniach
-                additionalInfoPanel.add(new JLabel("Czas obliczeń: "));
-                additionalInfoPanel.add(new JLabel(String.valueOf(resultDataObject.getComputationsTime())));
-                additionalInfoPanel.add(new JLabel("Precyzja obliczeń: "));
+                //wiersz czasu obliczeń
+                JPanel computTimePanel = new JPanel();
+                computTimePanel.setLayout(new BoxLayout(computTimePanel, BoxLayout.LINE_AXIS));
+                computTimePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                computTimePanel.add(new JLabel("Czas obliczeń: "));
+                computTimePanel.add(new JLabel(String.valueOf(resultDataObject.getComputationsTime()) + "ms"));
+
+                //wiersz precyzji obliczeń
+                JPanel precisionPanel = new JPanel();
+                precisionPanel.setLayout(new BoxLayout(precisionPanel, BoxLayout.LINE_AXIS));
+                precisionPanel.add(new JLabel("Precyzja obliczeń: "));
+                precisionPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
                 if( resultDataObject.getMethodName().equals(AvailableMethodsPanel.JacobiMethod)     ||
                         resultDataObject.getMethodName().equals(AvailableMethodsPanel.GaussaSeidla) ||
                         resultDataObject.getMethodName().equals(AvailableMethodsPanel.SOR)     ){
-                    additionalInfoPanel.add(new JLabel(String.valueOf(resultDataObject.getPrecision())));
+                    precisionPanel.add(new JLabel(String.valueOf(resultDataObject.getPrecision())));
                 }else{
-                    additionalInfoPanel.add(new JLabel("Nie dotyczy"));
+                    precisionPanel.add(new JLabel("Nie dotyczy"));
                 }
-                additionalInfoPanel.add(new JLabel("Liczba iteracji: "));
+
+                //wierz liczby iteracji
+                JPanel iterationsPanel = new JPanel();
+                iterationsPanel.setLayout(new BoxLayout(iterationsPanel, BoxLayout.LINE_AXIS));
+                iterationsPanel.add(new JLabel("Liczba iteracji: "));
+                iterationsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
                 if( resultDataObject.getMethodName().equals(AvailableMethodsPanel.JacobiMethod)     ||
                         resultDataObject.getMethodName().equals(AvailableMethodsPanel.GaussaSeidla) ||
                         resultDataObject.getMethodName().equals(AvailableMethodsPanel.SOR)     ){
-                    additionalInfoPanel.add(new JLabel(String.valueOf(resultDataObject.getIterationsNumber())));
+                    iterationsPanel.add(new JLabel(String.valueOf(resultDataObject.getIterationsNumber())));
+                }else {
+                    iterationsPanel.add(new JLabel("Nie dotyczy"));
                 }
-                additionalInfoPanel.add(new JLabel("Nie dotyczy"));
-
-
-                additionalInfoPanel.add(new JLabel("Parametr relaksacji SOR: "));
+                //wierz parametru sor
+                JPanel sorParamPanel = new JPanel();
+                sorParamPanel.setLayout(new BoxLayout(sorParamPanel, BoxLayout.LINE_AXIS));
+                sorParamPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                sorParamPanel.add(new JLabel("Parametr relaksacji SOR: "));
                 if( resultDataObject.getMethodName().equals(AvailableMethodsPanel.SOR) ){
-                    additionalInfoPanel.add(new JLabel(String.valueOf(resultDataObject.getParameter())));
+                    sorParamPanel.add(new JLabel(String.valueOf(resultDataObject.getParameter())));
                 }else{
-                    additionalInfoPanel.add(new JLabel("Nie dotyczy"));
+                    sorParamPanel.add(new JLabel("Nie dotyczy"));
                 }
+
+                additionalInfoPanel.add(computTimePanel);
+                additionalInfoPanel.add(precisionPanel);
+                additionalInfoPanel.add(iterationsPanel);
+                additionalInfoPanel.add(sorParamPanel);
 
             }else{
                 //niepowodzenie w obliczeniach
-                additionalInfoPanel.add(new JLabel("Czas obliczeń: "));
-                additionalInfoPanel.add(new JLabel("Nie dotyczy"));
-                additionalInfoPanel.add(new JLabel("Precyzja obliczeń: "));
-                additionalInfoPanel.add(new JLabel("Nie dotyczy"));
-                additionalInfoPanel.add(new JLabel("Liczba iteracji: "));
-                additionalInfoPanel.add(new JLabel("Nie dotyczy"));
-                additionalInfoPanel.add(new JLabel("Parametr relaksacji SOR: "));
-                additionalInfoPanel.add(new JLabel("Nie dotyczy"));
+                JPanel computTimePanel = new JPanel();
+                computTimePanel.setLayout(new BoxLayout(computTimePanel, BoxLayout.LINE_AXIS));
+                computTimePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                computTimePanel.add(new JLabel("Czas obliczeń: "));
+                computTimePanel.add(new JLabel("Nie dotyczy"));
 
+                JPanel precisionPanel = new JPanel();
+                precisionPanel.setLayout(new BoxLayout(precisionPanel, BoxLayout.LINE_AXIS));
+                precisionPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                precisionPanel.add(new JLabel("Precyzja obliczeń: "));
+                precisionPanel.add(new JLabel("Nie dotyczy"));
 
+                JPanel iterationsPanel = new JPanel();
+                iterationsPanel.setLayout(new BoxLayout(iterationsPanel, BoxLayout.LINE_AXIS));
+                iterationsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                iterationsPanel.add(new JLabel("Liczba iteracji: "));
+                iterationsPanel.add(new JLabel("Nie dotyczy"));
+
+                JPanel sorParamPanel = new JPanel();
+                sorParamPanel.setLayout(new BoxLayout(sorParamPanel, BoxLayout.LINE_AXIS));
+                sorParamPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                sorParamPanel.add(new JLabel("Parametr relaksacji SOR: "));
+                sorParamPanel.add(new JLabel("Nie dotyczy"));
+
+                additionalInfoPanel.add(computTimePanel);
+                additionalInfoPanel.add(precisionPanel);
+                additionalInfoPanel.add(iterationsPanel);
+                additionalInfoPanel.add(sorParamPanel);
             }
 
 

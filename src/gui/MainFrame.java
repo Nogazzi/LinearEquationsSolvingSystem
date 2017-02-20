@@ -57,15 +57,37 @@ public class MainFrame extends JFrame {
             double[][] matrixA = equationsDataPanel.getMatrixAData();
             double[] matrixB = equationsDataPanel.getMatrixBData();
             LinearEquationMethods method = new LinearEquationMethods();
+            int iterations;
+            double precision;
+            double sorParam;
             switch( selectedMethod ){
                 case AvailableMethodsPanel.GaussaSeidla:
-                    resultsDataPanel.addNewTab(method.metodaGaussaSeidla(matrixA, matrixB, equationsDataPanel.getPrecisionParameter()));
+                    try {
+                        iterations = equationsDataPanel.getMaxIterationsNumber();
+                        precision = equationsDataPanel.getPrecisionParameter();
+                        resultsDataPanel.addNewTab(method.metodaGaussaSeidla(matrixA, matrixB, precision, iterations));
+                    }catch (NumberFormatException exception){
+
+                    }
                     break;
                 case AvailableMethodsPanel.JacobiMethod:
-                    resultsDataPanel.addNewTab(method.metodaJacobiego(matrixA, matrixB, equationsDataPanel.getPrecisionParameter()));
+                    try {
+                        iterations = equationsDataPanel.getMaxIterationsNumber();
+                        precision = equationsDataPanel.getPrecisionParameter();
+                        resultsDataPanel.addNewTab(method.metodaJacobiego(matrixA, matrixB, precision, iterations));
+                    }catch (NumberFormatException exception){
+
+                    }
                     break;
                 case AvailableMethodsPanel.SOR:
-                    resultsDataPanel.addNewTab(method.metodaSOR(matrixA, matrixB, equationsDataPanel.getWspolczynnikSOR(), equationsDataPanel.getPrecisionParameter()));
+                    try {
+                        iterations = equationsDataPanel.getMaxIterationsNumber();
+                        precision = equationsDataPanel.getPrecisionParameter();
+                        sorParam = equationsDataPanel.getWspolczynnikSOR();
+                        resultsDataPanel.addNewTab(method.metodaSOR(matrixA, matrixB, sorParam, precision, iterations));
+                    }catch (NumberFormatException exception){
+
+                    }
                     break;
                 case AvailableMethodsPanel.ElimGausSeidl:
                     resultsDataPanel.addNewTab(method.metodaEliminacjiGaussa(matrixA, matrixB));

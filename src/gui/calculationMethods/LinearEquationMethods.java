@@ -13,7 +13,9 @@ public class LinearEquationMethods {
     public static String COMMENT_FAIL = "fail";
 
 
-    public ResultDataObject metodaJacobiego(double[][] matrixA, double[] matrixB, double precisionParameter){
+    public ResultDataObject metodaJacobiego(double[][] matrixA, double[] matrixB, double precisionParameter, int maxIterationsNumber){
+        long startTime = System.currentTimeMillis();
+        long endTime;
         ResultDataObject resultDataObject = new ResultDataObject();
         resultDataObject.setMethodName(AvailableMethodsPanel.JacobiMethod);
         resultDataObject.setMatrixA(copyMatrix(matrixA));
@@ -32,6 +34,8 @@ public class LinearEquationMethods {
             e.printStackTrace();
             resultDataObject.setCompleted(false);
             resultDataObject.setReason("Macierz jest osobliwa");
+            endTime = System.currentTimeMillis();
+            resultDataObject.setComputationsTime(endTime-startTime);
             return resultDataObject;
         }
         double[] matrixN = matrixMultiplication(matrixD, matrixB);
@@ -47,11 +51,11 @@ public class LinearEquationMethods {
         }
         boolean preciseEnough = false;
         double difference;
-        int iteracja = 1;
-        while( preciseEnough == false ){
+        int iterations = 1;
+        while( preciseEnough == false && iterations < maxIterationsNumber ){
             resultMatrix = copyMatrix(tmpResultMatrix);
             //reprintMatrix(tmpResultMatrix, resultMatrix);
-            System.out.println("Iteracja: " + iteracja);
+            System.out.println("Iteracja: " + iterations);
             System.out.println("Wejsciowa macierz M:");
             printMatrix(matrixM);
             System.out.println("Wejsciowa macierz x^n:");
@@ -74,20 +78,23 @@ public class LinearEquationMethods {
                     preciseEnough = false;
                 }
             }
-            iteracja++;
+            iterations++;
         }
         printMatrix(resultMatrix);
 
         resultDataObject.setCompleted(true);
-        resultDataObject.setIterationsNumber(iteracja);
+        resultDataObject.setIterationsNumber(iterations);
         resultDataObject.setResultX(copyMatrix(resultMatrix));
+        endTime = System.currentTimeMillis();
+        resultDataObject.setComputationsTime(endTime-startTime);
         return resultDataObject;
     }
 
 
 
-    public ResultDataObject metodaGaussaSeidla(double[][] matrixA, double[]matrixB, double precisionParameter){
-
+    public ResultDataObject metodaGaussaSeidla(double[][] matrixA, double[] matrixB, double precisionParameter, int maxIterationsNumber){
+        long startTime = System.currentTimeMillis();
+        long endTime;
         ResultDataObject resultDataObject = new ResultDataObject();
         resultDataObject.setMethodName(AvailableMethodsPanel.GaussaSeidla);
         resultDataObject.setMatrixA(copyMatrix(matrixA));
@@ -105,6 +112,8 @@ public class LinearEquationMethods {
             e.printStackTrace();
             resultDataObject.setCompleted(false);
             resultDataObject.setReason("Macierz jest osobliwa");
+            endTime = System.currentTimeMillis();
+            resultDataObject.setComputationsTime(endTime-startTime);
             return resultDataObject;
         }
         if( matrixDiagonalDomination(matrixA) ){
@@ -114,12 +123,16 @@ public class LinearEquationMethods {
             System.out.println("Metoda Jacobiego nie będzie zbieżna.");
             resultDataObject.setCompleted(false);
             resultDataObject.setReason("Macierz nie jest diagonalnie dominująca");
+            endTime = System.currentTimeMillis();
+            resultDataObject.setComputationsTime(endTime-startTime);
             return resultDataObject;
         }
         if( peculiar(matrixA) ){
             System.out.println("Macierz jest osobliwa!");
             resultDataObject.setCompleted(false);
             resultDataObject.setReason("Macierz jest osobliwa");
+            endTime = System.currentTimeMillis();
+            resultDataObject.setComputationsTime(endTime-startTime);
             return resultDataObject;
         }
 
@@ -142,7 +155,7 @@ public class LinearEquationMethods {
             tmpMat[i] = 0;
             actualRes[i] = 0;
         }
-        while( enough == false && iterations < 5 ){
+        while( enough == false && iterations < maxIterationsNumber  ){
             actualRes = copyMatrix(tmpMat);
             //reprintMatrix(tmpMat, actualRes);
             tmpMat = matrixMultiplication(matrixM, tmpMat);
@@ -167,10 +180,14 @@ public class LinearEquationMethods {
         resultDataObject.setIterationsNumber(iterations);
         resultDataObject.setResultX(copyMatrix(resultMatrix));
         resultDataObject.setCompleted(true);
+        endTime = System.currentTimeMillis();
+        resultDataObject.setComputationsTime(endTime-startTime);
         return resultDataObject;
     }
 
-    public ResultDataObject metodaSOR(double[][] matrixA, double[]matrixB, double wspolczynnik, double precisionParameter){
+    public ResultDataObject metodaSOR(double[][] matrixA, double[] matrixB, double wspolczynnik, double precisionParameter, int maxIterationsNumber){
+        long startTime = System.currentTimeMillis();
+        long endTime;
         ResultDataObject resultDataObject = new ResultDataObject();
         resultDataObject.setMethodName(AvailableMethodsPanel.SOR);
         resultDataObject.setMatrixA(copyMatrix(matrixA));
@@ -193,6 +210,8 @@ public class LinearEquationMethods {
             e.printStackTrace();
             resultDataObject.setCompleted(false);
             resultDataObject.setReason("Macierz jest osobliwa");
+            endTime = System.currentTimeMillis();
+            resultDataObject.setComputationsTime(endTime-startTime);
             return resultDataObject;
         }
         //macierz shared juz gotowa
@@ -216,12 +235,16 @@ public class LinearEquationMethods {
             System.out.println("Metoda Jacobiego nie będzie zbieżna.");
             resultDataObject.setCompleted(false);
             resultDataObject.setReason("Macierz nie jest diagonalnie dominująca");
+            endTime = System.currentTimeMillis();
+            resultDataObject.setComputationsTime(endTime-startTime);
             return resultDataObject;
         }
         if( peculiar(matrixA) ){
             System.out.println("Macierz jest osobliwa!");
             resultDataObject.setCompleted(false);
             resultDataObject.setReason("Macierz jest osobliwa!");
+            endTime = System.currentTimeMillis();
+            resultDataObject.setComputationsTime(endTime-startTime);
             return resultDataObject;
         }
         //obliczenia iteracyjne
@@ -236,7 +259,7 @@ public class LinearEquationMethods {
             resultMatrix[i] = 0;
             actualRes[i] = 0;
         }
-        while( enough == false ){
+        while( enough == false && iterations < maxIterationsNumber ){
             actualRes = copyMatrix(resultMatrix);
             System.out.println("\nIteracja " + iterations);
             System.out.println("Macierz wejsciowa M:");
@@ -266,12 +289,14 @@ public class LinearEquationMethods {
         resultDataObject.setIterationsNumber(iterations);
         resultDataObject.setResultX(copyMatrix(resultMatrix));
         resultDataObject.setCompleted(true);
-
+        endTime = System.currentTimeMillis();
+        resultDataObject.setComputationsTime(endTime-startTime);
         return resultDataObject;
     }
 
     public ResultDataObject metodaEliminacjiGaussa(double[][] matrixA, double[] matrixB){
-
+        long startTime = System.currentTimeMillis();
+        long endTime;
         ResultDataObject resultDataObject = new ResultDataObject();
         resultDataObject.setMethodName(AvailableMethodsPanel.ElimGausSeidl);
         resultDataObject.setMatrixA(copyMatrix(matrixA));
@@ -288,6 +313,8 @@ public class LinearEquationMethods {
                 if( tmpMatrixA[k][k] == 0 ){
                     resultDataObject.setCompleted(false);
                     resultDataObject.setReason("Dzielenie przez 0");
+                    endTime = System.currentTimeMillis();
+                    resultDataObject.setComputationsTime(endTime-startTime);
                     return resultDataObject;
                 }
                 double alfa = tmpMatrixA[i][k] / tmpMatrixA[k][k];
@@ -307,6 +334,8 @@ public class LinearEquationMethods {
             if( tmpMatrixA[i][i] == 0 ){
                 resultDataObject.setCompleted(false);
                 resultDataObject.setReason("Dzielenie przez 0");
+                endTime = System.currentTimeMillis();
+                resultDataObject.setComputationsTime(endTime-startTime);
                 return resultDataObject;
             }
             tmpMatrixB[i] /= tmpMatrixA[i][i];
@@ -317,12 +346,14 @@ public class LinearEquationMethods {
 
         resultDataObject.setResultX(copyMatrix(tmpMatrixB));
         resultDataObject.setCompleted(true);
-
+        endTime = System.currentTimeMillis();
+        resultDataObject.setComputationsTime(endTime-startTime);
         return resultDataObject;
     }
 
     public ResultDataObject metodaRozkladuLU(double[][] matrixA, double[] matrixB){
-
+        long startTime = System.currentTimeMillis();
+        long endTime;
         ResultDataObject resultDataObject = new ResultDataObject();
         resultDataObject.setMethodName(AvailableMethodsPanel.LUdecomposition);
         resultDataObject.setMatrixA(copyMatrix(matrixA));
@@ -341,6 +372,8 @@ public class LinearEquationMethods {
                 if( tmpMatrixU[k][k] == 0 ){
                     resultDataObject.setCompleted(false);
                     resultDataObject.setReason("Dzielenie przez 0");
+                    endTime = System.currentTimeMillis();
+                    resultDataObject.setComputationsTime(endTime-startTime);
                     return resultDataObject;
                 }
                 double alfa = tmpMatrixU[i][k] / tmpMatrixU[k][k];
@@ -374,6 +407,8 @@ public class LinearEquationMethods {
             if( tmpMatrixL[i][i] == 0 ){
                 resultDataObject.setCompleted(false);
                 resultDataObject.setReason("Dzielenie przez 0");
+                endTime = System.currentTimeMillis();
+                resultDataObject.setComputationsTime(endTime-startTime);
                 return resultDataObject;
             }
             resultY[i] /= tmpMatrixL[i][i];
@@ -389,6 +424,8 @@ public class LinearEquationMethods {
             if( tmpMatrixU[i][i] == 0 ){
                 resultDataObject.setCompleted(false);
                 resultDataObject.setReason("Dzielenie przez 0");
+                endTime = System.currentTimeMillis();
+                resultDataObject.setComputationsTime(endTime-startTime);
                 return resultDataObject;
             }
             resutlX[i] /= tmpMatrixU[i][i];
@@ -406,6 +443,8 @@ public class LinearEquationMethods {
 
         resultDataObject.setResultX(copyMatrix(resutlX));
         resultDataObject.setCompleted(true);
+        endTime = System.currentTimeMillis();
+        resultDataObject.setComputationsTime(endTime-startTime);
         return resultDataObject;
     }
 
